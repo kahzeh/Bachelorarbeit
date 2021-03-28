@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# -*- coding: utf-8 -*-
+
 
 import sys
 import json
@@ -13,7 +13,7 @@ if __name__ == '__main__':
     inputfile = sys.argv[1]
     outputfile = sys.argv[2]
     jsonfile = sys.argv[3]
-    with open(inputfile) as file:
+    with open(inputfile, encoding='latin-1') as file:
         lines = file.readlines()
     
     output = ''
