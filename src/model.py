@@ -1,10 +1,36 @@
+import os
 import torch
+from torch import nn
+import torch.nn.functional as F
+from torch.utils.data import DataLoader, random_split
 import pytorch_lightning as pl
 
 
-class TransformerModel(pl.LightningModule):
+class Transformer(pl.LightningModule):
+
+    def __init__(
+        self, 
+        *,
+        input_dim,
+        hidden_dim,
+        num_heads,
+        dropout,
+        num_layers,
+        activation='relu'
+        ):
+        super().__init__()
+        trm_layer = nn.TransformerEncoderLayer(
+            input_dim,
+            num_heads,
+            dim_feedforward=hidden_dim,
+            dropout=dropout,
+            activation=activation
+        )
+        self.trm = nn.TransformerEncoder(trm_layer, num_layers)
+
+
     def forward(self, x):
-        embedding = self.transformer_encoder(x)
+        embedding = self.trm(x)
         # embedding B x T x H
         pooled_output = self.pooling_layer(embedding)
          #take the first token, mean pooling
