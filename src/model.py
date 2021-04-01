@@ -19,18 +19,18 @@ class Transformer(pl.LightningModule):
         activation='relu'
         ):
         super().__init__()
-        trm_layer = nn.TransformerEncoderLayer(
+        encoderLayer = nn.TransformerEncoderLayer(
             input_dim,
             num_heads,
             dim_feedforward=hidden_dim,
             dropout=dropout,
             activation=activation
         )
-        self.trm = nn.TransformerEncoder(trm_layer, num_layers)
+        self.encoder = nn.TransformerEncoder(trm_layer, num_layers)
 
 
     def forward(self, x):
-        embedding = self.trm(x)
+        embedding = self.encoder(x)
         # embedding B x T x H
         pooled_output = self.pooling_layer(embedding)
          #take the first token, mean pooling

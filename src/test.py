@@ -1,5 +1,5 @@
-string = "[White \"3000\"]"
+string = "sijafhisdafga 1-0"
+string2 = 'sjidhjdf 1/2-1/2'
 
-x = string[1:-2].split(' "', 1)
-
-print(x) 
+print(string[-3:]) 
+print(string2[-7:]) 
