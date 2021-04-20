@@ -249,3 +249,5 @@ pgn2/Zukertort.pgn
 pgn2/Zvjaginsev.pgn
 dictionary.json
 test.jsonl
+lightning_logs/*
+Untitled/*

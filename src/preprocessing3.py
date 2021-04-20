@@ -1,38 +1,63 @@
 #!/usr/bin/python3
-
+import os
+import torch
+from torch import nn
+import torch.nn.functional as F
+from torch.utils.data import DataLoader, random_split
+from torch.optim import Adam
+import pytorch_lightning as pl
 import sys
 import jsonlines
-import os
-from collections import defaultdict
 import re
-import pickle
-import chess.pgn
-import chess.polyglot
-import io
+from dictionaries import charwise_dict, wordpiece_dict3
+from tokenizers import Tokenizer
+from tokenizers.models import WordPiece
+from tokenizers.processors import TemplateProcessing
+from tokenizers.pre_tokenizers import WhitespaceSplit
 
 
+def wordpiece_tokenize(line):
+    tokenizer = Tokenizer(WordPiece(wordpiece_dict3))
+    tokenizer.enable_padding(length=200)
+    tokenizer.enable_truncation(max_length=200)
+    tokenizer.pre_tokenizer = WhitespaceSplit()
+    tokenizer.post_processor = TemplateProcessing(
+        single="[CLS] $A [SEP]",
+        pair="[CLS] $A [SEP] $B:1 [SEP]:1",
+        special_tokens=[
+            ("[CLS]", 1),
+            ("[SEP]", 2),
+        ],
+    )
+    output = tokenizer.encode(line)
+    return(output.ids)
 
 
 def tokenize(line, method = 'char'):
     tokenized_line = []
     if method == 'char':
-        token2id = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7, '1': 8, '2': 9, '3': 10, '4': 11, '5': 12, '6': 13, '7': 14, '8': 15, '9': 16, 'O': 17, 'x': 18, '1/2-1/2': 18, '1-0': 20, '0-1': 21, '.': 22, '#': 23, '+':24, 'K': 25, 'R': 26, 'B': 27, 'Q': 28, 'N': 29, '-': 30}
         if '1/2-1/2' in line[-7:]:
-            tokenized_line.append(token2id['1/2-1/2']) 
+            tokenized_line.append(charwise_dict['1/2-1/2']) 
             for char in line[:-7]:
                 if char != ' ':
-                    print(char)
-                    tokenized_line.append(token2id[char])
+                    tokenized_line.append(charwise_dict[char])
             return(tokenized_line)
         else:
-            tokenized_line.append(token2id[line[-3:]])
+            tokenized_line.append(charwise_dict[line[-3:]])
             for char in line[:-3]:
                 if char != ' ':
-                    tokenized_line.append(token2id[char])
+                    tokenized_line.append(charwise_dict[char])
             return(tokenized_line)
-    # elif method == 'wordpiece':
 
-
+    elif method == 'wordpiece':
+        if '1/2-1/2' in line[-7:]:
+            tokenized_line.append(wordpiece_dict3['1/2-1/2'])
+            tokenized_line += wordpiece_tokenize(line[:-7])
+            return(tokenized_line)
+        else:
+            tokenized_line.append(wordpiece_dict3[line[-3:]])
+            tokenized_line += wordpiece_tokenize(line[:-3])
+            return(tokenized_line)
 
 
 if len(sys.argv) != 3:
@@ -52,6 +77,10 @@ lines[:] = [line.strip() for line in lines if line.strip()]
 
 for line in lines:
 
+    if '*' in line[-2:]:
+        continue
+
+
     game['id'] = n
 
     if line[0] == '[':
@@ -60,13 +89,17 @@ for line in lines:
 
     if line[0] == '1':           
         game['pgn-raw'] = line
-        tokenized_line = tokenize(line)
+        tokenized_line = tokenize(line, method='wordpiece')
+        print(n)
         game['tokenized_pgn'] = tokenized_line
         games.append(game)
         n += 1
         game = {}
     
-
+for x in games:
+    if 'ECO' not in x:
+        print(x['id'])
+        games.remove(x)
 
 with jsonlines.open(jsonlfile, mode="w") as writer:  
     writer.write_all(games) 
