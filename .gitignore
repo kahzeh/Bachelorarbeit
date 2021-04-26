@@ -251,3 +251,8 @@ dictionary.json
 test.jsonl
 lightning_logs/*
 Untitled/*
+uniquenames.txt
+src/__pycache__/dictionaries.cpython-39.pyc
+metrics.json
+loss.json
+

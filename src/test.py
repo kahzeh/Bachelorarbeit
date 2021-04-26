@@ -19,7 +19,14 @@ class DataModule(pl.LightningDataModule):
         df_inter.columns = ['json_element']
 
         self.df_final = pd.json_normalize(df_inter['json_element'].apply(json.loads))
-
+        x = (self.df_final['White'].value_counts()).to_dict()
+        liste = []
+        for z in list(x)[0:99]:
+            print(z, x[z])
+            liste.append(z)
+        print(liste)
+        with open('uniquenames.txt', 'w') as f:
+            f.write(json.dumps(x))
         self.df_final['tokenized_pgn'] = self.df_final['tokenized_pgn'].apply(lambda x: np.array(x))
         self.x = torch.Tensor(list(self.df_final['tokenized_pgn'].values))
 
@@ -48,10 +55,3 @@ train_set, test_set, val_set = random_split(dataset, [train_size, test_size, val
 train_loader = DataLoader(dataset = train_set, batch_size=4, shuffle=True)
 test_loader = DataLoader(dataset = test_set, batch_size=4, shuffle=True)
 val_loader = DataLoader(dataset = val_set, batch_size=4, shuffle=True)
-
-#train_loader = DataLoader(dataset = train_set, batch_size=4, shuffle=True )
-dataiter = iter(train_loader)
-data = dataiter.next()
-pgn, y1 = data
-
-print(pgn, y1)
