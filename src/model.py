@@ -258,11 +258,11 @@ def main(hparams):
 
 
 
-    # for item in transformer.train_metrics_list:
-    #     for dicts in item:
-    #         for sub_dicts in dicts.values():
-    #             for key, value in sub_dicts.items():
-    #                 sub_dicts[key] = value.item()
+    for item in transformer.train_metrics_list:
+        for dicts in item:
+            for sub_dicts in dicts.values():
+                for key, value in sub_dicts.items():
+                    sub_dicts[key] = value.item()
 
     # with open('metrics.json', 'w') as f:
     #     json.dump(transformer.train_metrics_list, f)

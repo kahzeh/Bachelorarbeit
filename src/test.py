@@ -1,57 +1,7 @@
-import pandas as pd
-import json
-import pytorch_lightning as pl
-import torch
-import numpy as np
-from torch.utils.data import DataLoader, random_split
-from dictionaries import eco_dict
+import subprocess 
 
-class DataModule(pl.LightningDataModule):   
+x = '1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. f3 e5 7. Nb3 Be7 8.Be3 O-O 9. Qd2 Be6 10. O-O-O Nbd7 11. g4 b5 12. g5 Nh5 13. h4 Nb6 14. Kb1 Ng3 15. Rg1 Nxf1 16. Rdxf1 Nc4 17. Qe2 b4 18. Nd5 Bxd5 19. exd5 Nxe3 20. Qxe3 a5 21. Nd2 a4 22. f4 Ra5 23. f5 f6 24. gxf6 Bxf6 25. h5 Rxd5 26. h6 Rf7 27. Ne4 Kh8 28. hxg7+ Rxg7 29. Qh6 Rf7 30. Rg6 Bg7 31. Qh5 Qf8 32. Ng5 h6 33. Rxh6+ Bxh6 34. Nxf7+ Kh7 35. Qg6# 1-0'
 
-    def __init__(self):
+s = subprocess.check_output(['pgn-extract', x ])
 
-        super().__init__()
-
-        with open('./test.jsonl') as f:
-            lines = f.read().splitlines()
-        
-        df_inter = pd.DataFrame(lines)
-        df_inter.columns = ['json_element']
-
-        self.df_final = pd.json_normalize(df_inter['json_element'].apply(json.loads))
-        x = (self.df_final['White'].value_counts()).to_dict()
-        liste = []
-        for z in list(x)[0:99]:
-            print(z, x[z])
-            liste.append(z)
-        print(liste)
-        with open('uniquenames.txt', 'w') as f:
-            f.write(json.dumps(x))
-        self.df_final['tokenized_pgn'] = self.df_final['tokenized_pgn'].apply(lambda x: np.array(x))
-        self.x = torch.Tensor(list(self.df_final['tokenized_pgn'].values))
-
-        self.df_final['ECO']= self.df_final['ECO'].map(eco_dict)
-        self.y_task1 = torch.tensor(list(self.df_final['ECO'].values))
-        #self.y_task2 = torch.tensor(list(df_final['White'].values))
-        #self.y_task3 = torch.tensor(list(df_final['Black'].values))
-        #self.y_task4 = torch.tensor(list(df_final['WhiteElo'].values))
-
-
-    def __getitem__(self, index):
-        return self.x[index], self.y_task1[index]
-        
-    def __len__(self):
-        return len(list(self.df_final['tokenized_pgn'].values))
-
-dataset = DataModule()
-
-
-train_size = 185452
-test_size = 39740
-val_size = 39740
-
-train_set, test_set, val_set = random_split(dataset, [train_size, test_size, val_size], generator=torch.Generator().manual_seed(42))
-
-train_loader = DataLoader(dataset = train_set, batch_size=4, shuffle=True)
-test_loader = DataLoader(dataset = test_set, batch_size=4, shuffle=True)
-val_loader = DataLoader(dataset = val_set, batch_size=4, shuffle=True)
+print(s)

@@ -100,19 +100,23 @@ for line in lines:
     
 for x in games:
     if 'ECO' not in x:
-        print(x['id'])
         games.remove(x)
-    
-    if x['White'] not in names_list:
-        x['White'] = 'UNK'
-    
-    if x['Black'] not in names_list:
-        x['Black'] = 'UNK'
+    else:
+        if x['White'] not in names_list:
+            x['White'] = 'UNK'
+        
+        if x['Black'] not in names_list:
+            x['Black'] = 'UNK'
 
-    x['Date'] = x['Date'][:4]
+        x['Date'] = x['Date'][:4]
 
-    x['Decade'] = str(int(math.floor(int(x['Date']) / 10.0)) * 10)
+        x['Decade'] = str(int(math.floor(int(x['Date']) / 10.0)) * 10)
 
+        if len(x['WhiteElo']) != 4 or len(x['BlackElo']) != 4:
+            games.remove(x)
+        else:    
+            x['WhiteElo2'] = str(int(math.floor(int(x['WhiteElo']) / 100.0)) * 100)
+            x['BlackElo2'] = str(int(math.floor(int(x['BlackElo']) / 100.0)) * 100)
 
 with jsonlines.open(jsonlfile, mode="w") as writer:  
     writer.write_all(games) 
